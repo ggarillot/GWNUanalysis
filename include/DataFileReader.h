@@ -39,7 +39,7 @@ class DataFileReader
     int                                  triggerID = -1;
     unsigned int                         nTriggerChannels{};
 
-    uint32_t nTDC = 0;
+    // uint32_t nTDC = 0;
 
     std::map<uint32_t, EventReadout> eventReadouts{};
 

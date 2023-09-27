@@ -69,7 +69,7 @@ void DataFileReader::readTDCConfig(const nlohmann::json& jsonConfig)
     triggerID = reader.getTriggerID();
     nTriggerChannels = reader.getTrigger().nChannels;
 
-    nTDC = reader.nTDC();
+    // nTDC = reader.nTDC();
 }
 
 void DataFileReader::readDataFile(std::fstream& dataFile)
@@ -127,7 +127,7 @@ void DataFileReader::readDataFile(std::fstream& dataFile)
         {
             tdcType -= 5;
 
-            if (tdcType > nTDC)
+            if (detectorDescriptionMap.find(tdcType) == detectorDescriptionMap.end() && tdcType != triggerID)
                 continue;
 
             readTDC(buffer, tdcType);
@@ -184,20 +184,20 @@ void DataFileReader::readHeader(std::vector<char> chars)
         nWorkingTDC++;
 
         if (detectorDescriptionMap.find(i) == detectorDescriptionMap.end() && i != triggerID)
-            std::cout << "ERROR : TDC in file not present in geometry" << std::endl;
+            std::cout << "WARNING : TDC in file not present in geometry : TDC " << i << std::endl;
     }
 
-    if (nWorkingTDC != nTDC)
-        throw std::logic_error("ERROR : TDC in file and TDC in config are not the same");
+    if (nWorkingTDC != (detectorDescriptionMap.size() + (triggerID != -1)))
+        std::cout << "WARNING : TDC in file and TDC in config are not the same" << std::endl;
 
-    unsigned int nLeftLines = chars.size() / 4 - 11 - nTDC;
+    unsigned int nLeftLines = chars.size() / 4 - 11 - nAnnouncedTDC;
 
     for (auto i = 0U; i < nLeftLines + 1; ++i)
     {
         for (int j = 3; j >= 0; --j)
         {
             if (debugStream)
-                *debugStream << chars[40 + nTDC * 4 + i * 4 + j];
+                *debugStream << chars[40 + nAnnouncedTDC * 4 + i * 4 + j];
         }
     }
     if (debugStream)
@@ -305,8 +305,9 @@ void DataFileReader::readTDC(std::vector<char> chars, uint32_t tdcID)
         }
     }
 
+    // TODO
     if (eventReadouts.find(eventNumber) == eventReadouts.end())
-        eventReadouts[eventNumber] = EventReadout(nTDC);
+        eventReadouts[eventNumber] = EventReadout(detectorDescriptionMap.size() + (triggerID != -1));
 
     const auto status = eventReadouts[eventNumber].addTDCReadout(tdcID, tdcReadout);
 

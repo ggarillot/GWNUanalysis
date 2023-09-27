@@ -104,28 +104,30 @@ DetectorCalibration DetectorCalibration::initCalibFromJson(const nlohmann::json&
     return detectorCalibration;
 }
 
-void DetectorCalibration::correctStrip(StripPtr strip, bool corrOffset, bool corrLR, bool corrTA) const
+void DetectorCalibration::correctStrip(
+    StripPtr strip, bool corrOffset, bool corrLR, bool corrTA, bool corrGlobOffset) const
 {
+    if (corrGlobOffset)
+    {
+        strip->timeL += globalOffset;
+        strip->timeR += globalOffset;
+    }
+
     const auto it = stripCalibrationMap.find(strip->ID);
     if (it == stripCalibrationMap.end())
         return;
 
     it->second.correctStrip(strip, corrOffset, corrLR, corrTA);
-
-    if (corrOffset)
-    {
-        strip->timeL += globalOffset;
-        strip->timeR += globalOffset;
-    }
 }
 
-void DetectorCalibration::correctCluster(ClusterPtr cluster, bool corrOffset, bool corrLR, bool corrTA) const
+void DetectorCalibration::correctCluster(
+    ClusterPtr cluster, bool corrOffset, bool corrLR, bool corrTA, bool corrGlobOffset) const
 {
     for (auto& strip : cluster->getStrips())
-        correctStrip(strip, corrOffset, corrLR, false);
+        correctStrip(strip, corrOffset, corrLR, false, true);
 
     auto bestStrip = cluster->orderedStripsByTotDesc().front();
-    correctStrip(bestStrip, false, false, corrTA);
+    correctStrip(bestStrip, false, false, corrTA, false);
 }
 
 std::array<double, 2> DetectorCalibration::getPositionAlongStrip(const StripPtr strip) const

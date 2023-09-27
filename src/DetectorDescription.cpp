@@ -1,5 +1,14 @@
 #include "DetectorDescription.h"
+#include <cstdint>
+#include <limits>
 #include <memory>
+
+DetectorDescription::DetectorDescription(const std::string& _name)
+    : name(_name)
+{
+    timeLimits[0] = std::numeric_limits<uint32_t>::min();
+    timeLimits[1] = std::numeric_limits<uint32_t>::max();
+}
 
 HitPtr DetectorDescription::getHit(const StripPtr strip) const
 {

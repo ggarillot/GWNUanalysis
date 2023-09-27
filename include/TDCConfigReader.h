@@ -8,12 +8,11 @@
 class TDCConfigReader
 {
   public:
-    TDCConfigReader();
+    TDCConfigReader() = default;
 
     void readTDCConfig(const nlohmann::json& jsonConfig);
 
     inline auto getDetectorDescriptionMap() const { return detectorDescriptionMap; }
-    inline auto getTimeLimits() const { return timeLimits; }
 
     inline auto getTriggerID() const { return triggerID; }
     inline auto getTrigger() const { return trigger; }
@@ -29,7 +28,6 @@ class TDCConfigReader
 
   protected:
     std::map<short, DetectorDescription> detectorDescriptionMap{};
-    std::array<uint32_t, 2>              timeLimits{};
 
     short   triggerID{-1};
     Trigger trigger{};

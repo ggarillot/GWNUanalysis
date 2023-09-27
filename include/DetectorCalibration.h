@@ -19,11 +19,21 @@ class DetectorCalibration
   public:
     DetectorCalibration() = default;
 
-    void correctStrip(StripPtr strip, bool corrOffset = true, bool corrLR = true, bool corrTA = true) const;
-    void correctCluster(ClusterPtr cluster, bool corrOffset = true, bool corrLR = true, bool corrTA = true) const;
+    void correctStrip(StripPtr strip,
+                      bool     corrOffset = true,
+                      bool     corrLR = true,
+                      bool     corrTA = true,
+                      bool     corrGlobOffset = true) const;
+
+    void correctCluster(ClusterPtr cluster,
+                        bool       corrOffset = true,
+                        bool       corrLR = true,
+                        bool       corrTA = true,
+                        bool       corrGlobOffset = true) const;
 
     std::array<double, 2> getPositionAlongStrip(const StripPtr strip) const;
 
+    inline double getGlobalOffset() const { return globalOffset; }
     inline double getdiffLRToPosition() const { return diffLRToPosition; }
 
     const StripCalibration* getStripCalibration(unsigned short stripID) const;

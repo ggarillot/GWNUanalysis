@@ -7,19 +7,8 @@
 
 #include "DetectorDescription.h"
 
-TDCConfigReader::TDCConfigReader()
-{
-    const auto min = std::numeric_limits<uint32_t>::min();
-    const auto max = std::numeric_limits<uint32_t>::max();
-    timeLimits = {min, max};
-}
-
 void TDCConfigReader::readTDCConfig(const nlohmann::json& configJson)
 {
-    const auto min = std::numeric_limits<uint32_t>::min();
-    const auto max = std::numeric_limits<uint32_t>::max();
-    timeLimits = {min, max};
-
     trigger = {};
     triggerID = -1;
 
@@ -45,6 +34,12 @@ void TDCConfigReader::readTDCConfig(const nlohmann::json& configJson)
         trigger.nChannels = channels;
         trigger.checkFor = checkFor;
         trigger.formula = formula;
+
+        if (triggerJson.contains("timeLimits"))
+        {
+            const auto timeLimits = triggerJson.at("timeLimits").get<std::array<uint32_t, 2>>();
+            trigger.timeLimits = timeLimits;
+        }
     }
 
     tdcIDSet.insert(triggerID);
@@ -74,9 +69,12 @@ void TDCConfigReader::readTDCConfig(const nlohmann::json& configJson)
         const auto detectorGeometry = DetectorGeometry(detectorJson.at("geometry"));
         detectorDescription.setGeometry(detectorGeometry);
 
+        if (detectorJson.contains("timeLimits"))
+        {
+            const auto timeLimits = detectorJson.at("timeLimits").get<std::array<uint32_t, 2>>();
+            detectorDescription.setTimeLimits(timeLimits);
+        }
+
         detectorDescriptionMap.insert({tdcID, detectorDescription});
     }
-
-    if (configJson.contains("timeLimits"))
-        timeLimits = configJson.at("timeLimits").get<std::array<uint32_t, 2>>();
 }

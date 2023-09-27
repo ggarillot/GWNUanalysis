@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <iostream>
 #include <optional>
 #include <stdexcept>
@@ -7,6 +8,12 @@
 
 struct Trigger
 {
+    Trigger()
+    {
+        timeLimits[0] = std::numeric_limits<uint32_t>::min();
+        timeLimits[1] = std::numeric_limits<uint32_t>::max();
+    }
+
     std::optional<double> getTime() const
     {
         if (times.size() != nChannels || formula.size() != nChannels || checkFor.size() != nChannels ||
@@ -25,6 +32,11 @@ struct Trigger
                 return {};
         }
 
+        // TODO check delta time between scintillators
+        // int32_t deltaTime = times[1] - times[3];
+        // if (deltaTime < 0 || deltaTime > 45)
+        //     return {};
+
         // compute time
         double       time = 0.;
         unsigned int n = 0;
@@ -42,6 +54,8 @@ struct Trigger
 
         return time / n;
     }
+
+    std::array<uint32_t, 2> timeLimits{};
 
     unsigned int nChannels{};
 

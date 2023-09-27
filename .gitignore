@@ -2,6 +2,8 @@
 *.json
 *.txt
 
+*.macro
+
 .env
 
 .cache/
