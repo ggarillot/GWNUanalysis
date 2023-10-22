@@ -416,24 +416,6 @@ void DataFileReader::writeEvent(uint32_t eventNumber)
             if (flagL == 0 && flagR == 0)
                 continue;
 
-            if (flagL == 4)
-            {
-                if (wL > maxTotL)
-                {
-                    maxTotL = wL;
-                    posOfMaxL = iStrip;
-                }
-            }
-
-            if (flagR == 4)
-            {
-                if (wR > maxTotR)
-                {
-                    maxTotR = wR;
-                    posOfMaxR = iStrip + nStrips;
-                }
-            }
-
             short flag = std::min(flagL, flagR);
 
             detector.push_back(tdcID);
@@ -450,6 +432,24 @@ void DataFileReader::writeEvent(uint32_t eventNumber)
             isHighLVec.push_back(false);
             isHighRVec.push_back(false);
             isHighVec.push_back(false);
+
+            if (flagL == 4)
+            {
+                if (wL > maxTotL)
+                {
+                    maxTotL = wL;
+                    posOfMaxL = isHighLVec.size() - 1;
+                }
+            }
+
+            if (flagR == 4)
+            {
+                if (wR > maxTotR)
+                {
+                    maxTotR = wR;
+                    posOfMaxR = isHighRVec.size() - 1;
+                }
+            }
 
             if (flag != 4)
                 continue;
