@@ -42,11 +42,15 @@ void DataFileReader::openOutputFile(std::string name)
     tree->Branch("detector", &detector);
     tree->Branch("strip", &strip);
     tree->Branch("flag", &flagVec);
+    tree->Branch("flagL", &flagLVec);
+    tree->Branch("flagR", &flagRVec);
     tree->Branch("timeL", &timeL);
     tree->Branch("timeR", &timeR);
     tree->Branch("totL", &totL);
     tree->Branch("totR", &totR);
-    tree->Branch("isHigh", &isHigh);
+    tree->Branch("isHighL", &isHighLVec);
+    tree->Branch("isHighR", &isHighRVec);
+    tree->Branch("isHigh", &isHighVec);
 }
 
 void DataFileReader::closeOutputFile()
@@ -334,11 +338,15 @@ void DataFileReader::writeEvent(uint32_t eventNumber)
     detector.clear();
     strip.clear();
     flagVec.clear();
+    flagLVec.clear();
+    flagRVec.clear();
     timeL.clear();
     timeR.clear();
     totL.clear();
     totR.clear();
-    isHigh.clear();
+    isHighLVec.clear();
+    isHighRVec.clear();
+    isHighVec.clear();
 
     auto tdcReadouts = event.getTDCReadouts();
 
@@ -386,6 +394,12 @@ void DataFileReader::writeEvent(uint32_t eventNumber)
         unsigned int maxTot = 0;
         short        posOfMax = -1;
 
+        unsigned int maxTotL = 0;
+        short        posOfMaxL = -1;
+
+        unsigned int maxTotR = 0;
+        short        posOfMaxR = -1;
+
         for (auto iStrip = 0U; iStrip < nStrips; iStrip++)
         {
             const auto chanL = iStrip;
@@ -402,30 +416,58 @@ void DataFileReader::writeEvent(uint32_t eventNumber)
             if (flagL == 0 && flagR == 0)
                 continue;
 
+            if (flagL == 4)
+            {
+                if (wL > maxTotL)
+                {
+                    maxTotL = wL;
+                    posOfMaxL = iStrip;
+                }
+            }
+
+            if (flagR == 4)
+            {
+                if (wR > maxTotR)
+                {
+                    maxTotR = wR;
+                    posOfMaxR = iStrip + nStrips;
+                }
+            }
+
             short flag = std::min(flagL, flagR);
 
             detector.push_back(tdcID);
             strip.push_back(iStrip);
             flagVec.push_back(flag);
+            flagLVec.push_back(flagL);
+            flagRVec.push_back(flagR);
             timeL.push_back(leadingTimeL);
             totL.push_back(wL);
             timeR.push_back(leadingTimeR);
             totR.push_back(wR);
 
             // get info of max ToT Strip
-            isHigh.push_back(false);
+            isHighLVec.push_back(false);
+            isHighRVec.push_back(false);
+            isHighVec.push_back(false);
+
             if (flag != 4)
                 continue;
             const auto tot = wL + wR;
             if (tot > maxTot)
             {
                 maxTot = tot;
-                posOfMax = isHigh.size() - 1;
+                posOfMax = isHighVec.size() - 1;
             }
         } // loop on strips
 
+        if (posOfMaxL > -1)
+            isHighLVec[posOfMaxL] = true;
+        if (posOfMaxR > -1)
+            isHighRVec[posOfMaxR] = true;
+
         if (posOfMax > -1)
-            isHigh[posOfMax] = true;
+            isHighVec[posOfMax] = true;
 
     } // loop on TDC
 

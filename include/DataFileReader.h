@@ -59,11 +59,15 @@ class DataFileReader
     std::vector<short>        detector{};
     std::vector<short>        strip{};
     std::vector<short>        flagVec{};
+    std::vector<short>        flagLVec{};
+    std::vector<short>        flagRVec{};
     std::vector<unsigned int> timeL{};
     std::vector<unsigned int> timeR{};
     std::vector<unsigned int> totL{};
     std::vector<unsigned int> totR{};
-    std::vector<bool>         isHigh{};
+    std::vector<bool>         isHighLVec{};
+    std::vector<bool>         isHighRVec{};
+    std::vector<bool>         isHighVec{};
 
   public:
     // 1100 0000 0000 0000 0000 0000 0000 0000
